@@ -1,0 +1,7 @@
+garminconnect
+curl_cffi
+pandas
+streamlit
+plotly
+python-dotenv
+pytest
