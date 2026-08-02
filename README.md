@@ -1,22 +1,41 @@
 # NYC Marathon Training Dashboard
 
-A small dashboard for tracking NYC Marathon training: it generates a
-week-by-week training plan, pulls your actual runs from Garmin Connect via
+A dashboard for tracking a specific 14-week NYC Marathon 2026 training block:
+it lays out a hand-authored training plan (see `plan_data.py`), pulls actual
+runs from Garmin Connect via
 [python-garminconnect](https://github.com/cyberjunky/python-garminconnect),
-and shows planned vs. actual mileage in a Streamlit dashboard.
+and shows planned vs. actual progress in a Streamlit dashboard.
 
 > Unofficial project, not affiliated with Garmin or NYRR. Use at your own
 > risk - `python-garminconnect` talks to Garmin's undocumented mobile API,
 > which can change or rate-limit without notice.
 
+## The plan
+
+`plan_data.py` encodes a specific 14-week build (race day Sunday, November 1,
+2026; block starts the week of July 27, 2026, three days post-Burning River
+50). It targets one runner's known limiter - neuromuscular durability
+exposed by a mile-45 failure in that ultra - with 6 running days/week
+peaking at 58-60 miles, quality on Tuesday and Thursday, downhill-specific
+work, a Week 10 tune-up half to recalibrate marathon pace, and a Week 11
+peak long run (21 miles, last 6 @ marathon pace) before a 3-week taper. It
+also carries the pace guide, twice-weekly strength program, NYC course
+notes, fueling guidance, and the block's rules - all shown in the
+dashboard's sidebar.
+
+This is literal, edit-it-directly data, not an algorithm - if the plan
+changes, change `plan_data.py`. `training_plan.py` only maps that data onto
+real calendar dates, anchored on `BLOCK_START_DATE`.
+
 ## Features
 
-- Algorithmically generated training plan (configurable length, start date
-  driven off your race day, and long-run build-up), with a periodic cutback
-  week and a taper into race day.
-- Syncs your running activities from Garmin Connect and caches them locally.
-- Streamlit dashboard comparing planned vs. actual daily/weekly mileage,
-  long-run progression, and the current week's workouts.
+- The full 14-week plan (98 days) laid out on the calendar, with phase
+  (Recovery/Rebuild/Build/Taper), the literal session text, strength
+  sessions, and per-week notes (e.g. downhill protocol, tune-up half).
+- Syncs running activities from Garmin Connect and caches them locally.
+- Streamlit dashboard: current week/phase, days to race, planned vs. actual
+  daily/weekly mileage, long-run progression, and reference panels for pace
+  zones, strength work, course notes, fueling, and block rules.
 
 ## Setup
 
@@ -26,8 +45,7 @@ and shows planned vs. actual mileage in a Streamlit dashboard.
    pip install -r requirements.txt
    ```
 
-2. Copy `.env.example` to `.env` and fill in your Garmin Connect credentials
-   and race details:
+2. Copy `.env.example` to `.env` and fill in your Garmin Connect credentials:
 
    ```bash
    cp .env.example .env
@@ -37,9 +55,7 @@ and shows planned vs. actual mileage in a Streamlit dashboard.
    | --- | --- |
    | `GARMIN_EMAIL` / `GARMIN_PASSWORD` | Your Garmin Connect login. |
    | `GARMIN_TOKEN_STORE` | Where the login session is cached (default `~/.garminconnect`). |
-   | `RACE_DATE` | Race day, `YYYY-MM-DD` (defaults to the 2026 NYC Marathon, 2026-11-01). |
-   | `PLAN_WEEKS` | Length of the training plan in weeks (default 18). |
-   | `START_LONG_RUN_MILES` / `PEAK_LONG_RUN_MILES` | Long-run mileage at the start of the plan and at its peak. |
+   | `BLOCK_START_DATE` | The Monday Week 1 starts (default `2026-07-27`). Race day and every week's dates shift automatically if you change this. |
 
 3. Sync your Garmin activities (run this from a terminal, not the dashboard,
    the first time - it may prompt for an MFA code):
@@ -58,18 +74,20 @@ and shows planned vs. actual mileage in a Streamlit dashboard.
    ```
 
    The training plan (`data/training_plan.csv`) is generated automatically
-   the first time the dashboard runs, using the settings in `.env`.
+   the first time the dashboard runs.
 
 ## Project layout
 
 ```
-config.py           Environment/config loading
-training_plan.py     Generates the week-by-week training plan
-garmin_client.py      Garmin Connect login + activity fetching
-sync_data.py          CLI script to refresh cached activity data
-dashboard.py           Streamlit dashboard
-tests/                 Unit tests for the plan generator
-data/                  Cached CSVs (gitignored)
+plan_data.py          The literal 14-week plan: sessions, strength program,
+                       pace guide, course notes, fueling, block rules
+config.py              Environment/config loading
+training_plan.py        Maps plan_data.py onto real calendar dates
+garmin_client.py         Garmin Connect login + activity fetching
+sync_data.py             CLI script to refresh cached activity data
+dashboard.py              Streamlit dashboard
+tests/                    Unit tests for the plan/calendar mapping
+data/                     Cached CSVs (gitignored)
 ```
 
 ## Running tests

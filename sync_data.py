@@ -8,15 +8,15 @@ so any MFA prompt can be answered interactively:
 Re-run any time to refresh data/activities.csv with your latest runs.
 """
 import os
-from datetime import timedelta
 
-from config import ACTIVITIES_CSV, DATA_DIR, PLAN_WEEKS, RACE_DATE
+from config import ACTIVITIES_CSV, DATA_DIR
 from garmin_client import connect, fetch_running_activities
+from training_plan import RACE_DATE, BLOCK_START_DATE
 
 
 def main() -> None:
     os.makedirs(DATA_DIR, exist_ok=True)
-    start_date = RACE_DATE - timedelta(weeks=PLAN_WEEKS)
+    start_date = BLOCK_START_DATE
     end_date = RACE_DATE
 
     print("Logging in to Garmin Connect...")
